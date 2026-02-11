@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laboratorio de Vulnerabilidades DOM</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body style="background-image: url('nnnoise.svg');">
+    <div class="container">
+        <!-- <header>
+            <h1>Laboratorio de Vulnerabilidades DOM</h1>
+            <p class="subtitle">Entorno controlado para practicar y dominar vulnerabilidades en el DOM</p>
+        </header> -->
+        
+        <div class="dashboard">
+            <div class="sidebar">
+                <h2>0xHaise - DOM Dojo</h2>
+                <ul class="nav-list">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active" data-target="intro">Introducción al DOM</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="sinks">Sinks de Vulnerabilidad <span class="difficulty-badge easy">Fácil ( ⸝⸝´꒳`⸝⸝)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="bypass">Bypass de Validación <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="gadgets">Gadgets DOM <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="xss">XSS en el DOM <span class="difficulty-badge hard">Difícil ( ˶°ㅁ°) !!</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="clobbering">DOM Clobbering <span class="difficulty-badge hard">Difícil ( ˶°ㅁ°) !!</span></a>
+                    </li>
+                    <!-- Nuevos desafíos de fuentes comunes -->
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="url-source">document.URL <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="cookie-source">document.cookie <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="referrer-source">document.referrer <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="name-source">window.name <span class="difficulty-badge hard">Difícil ( ˶°ㅁ°) !!</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="storage-source">Web Storage <span class="difficulty-badge medium">Medio</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" data-target="history-source">History API <span class="difficulty-badge hard">Difícil ( ˶°ㅁ°) !!</span></a>
+                    </li>
+                </ul>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p style="text-align: center; margin-top: 10px; font-size: 0.9rem;">Progreso: <span id="progressText">0%</span></p>
+            </div>
+            
+            <div class="main-content">
+                <!-- Secciones existentes (intro, sinks, bypass, gadgets, xss, clobbering) -->
+                <!-- Introducción al DOM -->
+                <div class="challenge-section active" id="intro">
+                    <h2 class="challenge-title">Introducción al DOM</h2>
+                    <div class="challenge-description">
+                        <p>El DOM (Document Object Model) es una interfaz de programación para documentos HTML y XML. Representa la estructura del documento como un árbol de objetos, permitiendo a los programas y scripts acceder y modificar dinámicamente el contenido, estructura y estilo del documento.</p>
+                        <p>En este laboratorio, exploraremos diferentes tipos de vulnerabilidades que pueden surgir cuando se manipula el DOM de manera insegura.</p>
+                    </div>
+                    <div class="code-container">
+                        // Ejemplo básico de manipulación del DOM<br>
+                        const element = document.getElementById('miElemento');<br>
+                        element.innerHTML = 'Nuevo contenido'; // Potencialmente peligroso
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Prueba de concepto:</label>
+                        <input type="text" class="input-field" id="introInput" placeholder="Escribe algo aquí...">
+                        <button class="btn btn-primary" id="introBtn">Actualizar DOM</button>
+                    </div>
+                    <div id="introResult"></div>
+                </div>
+                
+                <!-- Sinks de Vulnerabilidad -->
+                <div class="challenge-section" id="sinks">
+                    <h2 class="challenge-title">Sinks de Vulnerabilidad</h2>
+                    <div class="challenge-description">
+                        <p>Los "sinks" son puntos en el código donde los datos controlados por el usuario pueden ejecutarse como código. Algunos sinks comunes incluyen:</p>
+                        <ul>
+                            <li><code>innerHTML</code> / <code>outerHTML</code></li>
+                            <li><code>document.write()</code></li>
+                            <li><code>eval()</code></li>
+                            <li><code>setTimeout()</code> / <code>setInterval()</code> con cadenas</li>
+                            <li><code>location</code> propiedades (href, assign, replace)</li>
+                        </ul>
+                        <p>Intenta explotar el siguiente sink para ejecutar código JavaScript.</p>
+                    </div>
+                    <div class="code-container">
+                        function updateContent() {<br>
+                        &nbsp;&nbsp;const userInput = document.getElementById('sinkInput').value;<br>
+                        &nbsp;&nbsp;document.getElementById('sinkResult').innerHTML = userInput;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Ingresa tu payload:</label>
+                        <input type="text" class="input-field" id="sinkInput" placeholder="Ej: &lt;img src=x onerror=alert(1)&gt;">
+                        <button class="btn btn-primary" id="sinkBtn">Actualizar</button>
+                    </div>
+                    <div id="sinkResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="sinkHint">Mostrar pista</button>
+                    <div class="hint-container" id="sinkHint">
+                        <p>Prueba con: <code>&lt;img src=x onerror=alert('XSS')&gt;</code></p>
+                    </div>
+                </div>
+                
+                <!-- Bypass de Validación -->
+                <div class="challenge-section" id="bypass">
+                    <h2 class="challenge-title">Bypass de Validación</h2>
+                    <div class="challenge-description">
+                        <p>Muchas aplicaciones implementan validaciones de entrada para prevenir ataques. Sin embargo, estas validaciones a menudo pueden ser eludidas mediante técnicas creativas.</p>
+                        <p>En este desafío, intenta eludir la validación que filtra ciertas palabras clave para ejecutar código JavaScript.</p>
+                    </div>
+                    <div class="code-container">
+                        function validateAndExecute() {<br>
+                        &nbsp;&nbsp;let input = document.getElementById('bypassInput').value;<br>
+                        &nbsp;&nbsp;// Filtro básico<br>
+                        &nbsp;&nbsp;if (input.includes('script') || input.includes('onerror') || input.includes('javascript')) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('bypassResult').innerHTML = 'Entrada bloqueada!';<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return;<br>
+                        &nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;document.getElementById('bypassResult').innerHTML = input;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Intenta eludir la validación:</label>
+                        <input type="text" class="input-field" id="bypassInput" placeholder="Tu payload aquí...">
+                        <button class="btn btn-primary" id="bypassBtn">Probar</button>
+                    </div>
+                    <div id="bypassResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="bypassHint">Mostrar pista</button>
+                    <div class="hint-container" id="bypassHint">
+                        <p>Prueba con: <code>&lt;img src=x onerror=alert(1)&gt;</code> pero modificado para evitar las palabras clave bloqueadas.</p>
+                    </div>
+                </div>
+                
+                <!-- Gadgets DOM -->
+                <div class="challenge-section" id="gadgets">
+                    <h2 class="challenge-title">Gadgets DOM</h2>
+                    <div class="challenge-description">
+                        <p>Los gadgets DOM son funciones o propiedades del DOM que pueden ser utilizadas de manera no intencionada para ejecutar código. A menudo se encuentran en bibliotecas JavaScript o en código de aplicación.</p>
+                        <p>En este desafío, identifica y utiliza un gadget DOM para ejecutar código.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código de una biblioteca ficticia<br>
+                        const AppUtils = {<br>
+                        &nbsp;&nbsp;sanitizeInput: function(input) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;// Supuesta sanitización<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return input.replace(/&lt;script&gt;/gi, '');<br>
+                        &nbsp;&nbsp;},<br>
+                        &nbsp;&nbsp;renderContent: function(elementId, content) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;const element = document.getElementById(elementId);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;if (element && content) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;element.innerHTML = this.sanitizeInput(content);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;}<br>
+                        };<br><br>
+                        
+                        // Tu código<br>
+                        function useGadget() {<br>
+                        &nbsp;&nbsp;const input = document.getElementById('gadgetInput').value;<br>
+                        &nbsp;&nbsp;AppUtils.renderContent('gadgetResult', input);<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Explota el gadget:</label>
+                        <input type="text" class="input-field" id="gadgetInput" placeholder="Tu payload aquí...">
+                        <button class="btn btn-primary" id="gadgetBtn">Ejecutar</button>
+                    </div>
+                    <div id="gadgetResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="gadgetHint">Mostrar pista</button>
+                    <div class="hint-container" id="gadgetHint">
+                        <p>La función de sanitización solo elimina etiquetas &lt;script&gt;. ¿Qué otras etiquetas HTML pueden ejecutar JavaScript?</p>
+                    </div>
+                </div>
+                
+                <!-- XSS en el DOM -->
+                <div class="challenge-section" id="xss">
+                    <h2 class="challenge-title">XSS en el DOM</h2>
+                    <div class="challenge-description">
+                        <p>El XSS basado en DOM ocurre cuando el código JavaScript de una página web procesa datos de origen no confiable de manera insegura y los escribe en el DOM.</p>
+                        <p>Este desafío simula una aplicación que utiliza datos de la URL para actualizar el contenido de la página. Intenta explotar esta funcionalidad para ejecutar código malicioso.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código que se ejecuta al cargar la página<br>
+                        function processURLParams() {<br>
+                        &nbsp;&nbsp;const urlParams = new URLSearchParams(window.location.search);<br>
+                        &nbsp;&nbsp;const message = urlParams.get('message');<br>
+                        &nbsp;&nbsp;if (message) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('xssResult').innerHTML = decodeURIComponent(message);<br>
+                        &nbsp;&nbsp;}<br>
+                        }<br><br>
+                        
+                        // Ejecutar al cargar<br>
+                        window.onload = processURLParams;
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Simula un ataque XSS DOM:</label>
+                        <input type="text" class="input-field" id="xssInput" placeholder="Tu payload XSS...">
+                        <button class="btn btn-primary" id="xssBtn">Probar</button>
+                    </div>
+                    <div id="xssResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="xssHint">Mostrar pista</button>
+                    <div class="hint-container" id="xssHint">
+                        <p>Construye una URL que contenga tu payload en el parámetro 'message'. Por ejemplo: <code>?message=&lt;svg onload=alert(1)&gt;</code></p>
+                    </div>
+                </div>
+                
+                <!-- DOM Clobbering -->
+                <div class="challenge-section" id="clobbering">
+                    <h2 class="challenge-title">DOM Clobbering</h2>
+                    <div class="challenge-description">
+                        <p>DOM Clobbering es una técnica donde se inyectan elementos HTML en una página para "sobrescribir" (clobber) propiedades y métodos JavaScript globales.</p>
+                        <p>Este ataque es particularmente útil cuando no se puede ejecutar JavaScript directamente, pero se puede inyectar HTML.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable<br>
+                        function checkAdmin() {<br>
+                        &nbsp;&nbsp;if (window.isAdmin) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('adminPanel').style.display = 'block';<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('clobberResult').innerHTML = 'Acceso de administrador concedido!';<br>
+                        &nbsp;&nbsp;} else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('clobberResult').innerHTML = 'Acceso denegado';<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Intenta clobber la propiedad isAdmin:</label>
+                        <input type="text" class="input-field" id="clobberInput" placeholder="Tu payload de clobbering...">
+                        <button class="btn btn-primary" id="clobberBtn">Probar</button>
+                    </div>
+                    <div id="clobberResult" class="result-container"></div>
+                    <div id="adminPanel" style="display: none; margin-top: 20px; padding: 15px; background-color: #d4edda; border-radius: 5px;">
+                        <h3>Panel de Administrador</h3>
+                        <p>¡Has obtenido acceso de administrador!</p>
+                    </div>
+                    <button class="hint-btn" data-hint="clobberHint">Mostrar pista</button>
+                    <div class="hint-container" id="clobberHint">
+                        <p>Los elementos HTML con id se convierten en propiedades globales. Prueba con: <code>&lt;a id="isAdmin"&gt;&lt;/a&gt;</code></p>
+                    </div>
+                </div>
+
+                <!-- NUEVOS DESAFÍOS DE FUENTES COMUNES -->
+
+                <!-- document.URL -->
+                <div class="challenge-section" id="url-source">
+                    <h2 class="challenge-title">document.URL / document.documentURI</h2>
+                    <div class="challenge-description">
+                        <p><code>document.URL</code> y <code>document.documentURI</code> devuelven la URL completa del documento actual. Si esta fuente se utiliza sin la sanitización adecuada, puede conducir a vulnerabilidades XSS.</p>
+                        <p>En este desafío, la aplicación utiliza la URL actual para mostrar un mensaje de bienvenida. Intenta explotar esta funcionalidad.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa document.URL<br>
+                        function displayWelcome() {<br>
+                        &nbsp;&nbsp;const url = document.URL;<br>
+                        &nbsp;&nbsp;const urlObj = new URL(url);<br>
+                        &nbsp;&nbsp;const username = urlObj.searchParams.get('user') || 'Invitado';<br>
+                        &nbsp;&nbsp;document.getElementById('urlResult').innerHTML = 'Bienvenido, ' + username + '!';<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Simula una URL maliciosa:</label>
+                        <input type="text" class="input-field" id="urlInput" placeholder="Ej: ?user=&lt;script&gt;alert(1)&lt;/script&gt;">
+                        <button class="btn btn-primary" id="urlBtn">Probar</button>
+                    </div>
+                    <div id="urlResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="urlHint">Mostrar pista</button>
+                    <div class="hint-container" id="urlHint">
+                        <p>Intenta usar: <code>?user=&lt;img src=x onerror=alert(1)&gt;</code></p>
+                    </div>
+                </div>
+
+                <!-- document.cookie -->
+                <div class="challenge-section" id="cookie-source">
+                    <h2 class="challenge-title">document.cookie</h2>
+                    <div class="challenge-description">
+                        <p><code>document.cookie</code> permite acceder y modificar las cookies asociadas con el documento. Si el valor de una cookie se refleja en el DOM sin sanitización, puede explotarse para XSS.</p>
+                        <p>Esta aplicación lee una cookie llamada 'preferences' y muestra su valor. Intenta establecer una cookie maliciosa.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa document.cookie<br>
+                        function displayPreferences() {<br>
+                        &nbsp;&nbsp;const cookies = document.cookie.split(';');<br>
+                        &nbsp;&nbsp;let preferences = 'No hay preferencias guardadas';<br>
+                        &nbsp;&nbsp;for (let cookie of cookies) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;const [name, value] = cookie.trim().split('=');<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;if (name === 'preferences') {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;preferences = decodeURIComponent(value);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break;<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;document.getElementById('cookieResult').innerHTML = 'Tus preferencias: ' + preferences;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Establece una cookie maliciosa:</label>
+                        <input type="text" class="input-field" id="cookieInput" placeholder="Ej: &lt;script&gt;alert(1)&lt;/script&gt;">
+                        <button class="btn btn-primary" id="cookieBtn">Establecer Cookie</button>
+                    </div>
+                    <div id="cookieResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="cookieHint">Mostrar pista</button>
+                    <div class="hint-container" id="cookieHint">
+                        <p>Usa la consola del navegador para establecer: <code>document.cookie = "preferences=&lt;img src=x onerror=alert(1)&gt;"</code></p>
+                    </div>
+                </div>
+
+                <!-- document.referrer -->
+                <div class="challenge-section" id="referrer-source">
+                    <h2 class="challenge-title">document.referrer</h2>
+                    <div class="challenge-description">
+                        <p><code>document.referrer</code> devuelve la URI de la página que enlazó a la página actual. Si este valor se refleja sin sanitización, un atacante puede crear un enlace malicioso que conduzca a XSS.</p>
+                        <p>Esta aplicación muestra la página de referencia. Intenta explotar esta funcionalidad.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa document.referrer<br>
+                        function showReferrer() {<br>
+                        &nbsp;&nbsp;const referrer = document.referrer;<br>
+                        &nbsp;&nbsp;if (referrer) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('referrerResult').innerHTML = 'Viniste desde: ' + referrer;<br>
+                        &nbsp;&nbsp;} else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('referrerResult').innerHTML = 'No hay referencia detectada';<br>
+                        &nbsp;&nbsp;}<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <p>Para este desafío, crea una página HTML que enlace a esta página con un referrer malicioso.</p>
+                        <textarea class="input-field" id="referrerCode" rows="5" placeholder="Código HTML para una página maliciosa..."></textarea>
+                        <button class="btn btn-primary" id="referrerBtn">Probar Referrer</button>
+                    </div>
+                    <div id="referrerResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="referrerHint">Mostrar pista</button>
+                    <div class="hint-container" id="referrerHint">
+                        <p>Crea una página HTML con: <code>&lt;meta http-equiv="refresh" content="0;url=http://tu-dominio/lab.html?&lt;script&gt;alert(1)&lt;/script&gt;"&gt;</code></p>
+                    </div>
+                </div>
+
+                <!-- window.name -->
+                <div class="challenge-section" id="name-source">
+                    <h2 class="challenge-title">window.name</h2>
+                    <div class="challenge-description">
+                        <p><code>window.name</code> puede ser utilizado para transportar datos entre diferentes páginas y dominios. Su valor persiste durante la navegación y puede ser explotado para XSS si se refleja sin sanitización.</p>
+                        <p>Esta aplicación utiliza window.name para recordar la última acción del usuario. Intenta explotar esta característica.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa window.name<br>
+                        function restoreState() {<br>
+                        &nbsp;&nbsp;if (window.name) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('nameResult').innerHTML = 'Estado anterior: ' + window.name;<br>
+                        &nbsp;&nbsp;} else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('nameResult').innerHTML = 'No hay estado guardado';<br>
+                        &nbsp;&nbsp;}<br>
+                        }<br><br>
+                        
+                        function saveState() {<br>
+                        &nbsp;&nbsp;const state = document.getElementById('nameInput').value;<br>
+                        &nbsp;&nbsp;window.name = state;<br>
+                        &nbsp;&nbsp;document.getElementById('nameResult').innerHTML = 'Estado guardado: ' + state;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Establece window.name malicioso:</label>
+                        <input type="text" class="input-field" id="nameInput" placeholder="Ej: &lt;script&gt;alert(1)&lt;/script&gt;">
+                        <button class="btn btn-primary" id="nameBtn">Guardar Estado</button>
+                        <button class="btn btn-secondary" id="nameRestoreBtn">Restaurar Estado</button>
+                    </div>
+                    <div id="nameResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="nameHint">Mostrar pista</button>
+                    <div class="hint-container" id="nameHint">
+                        <p>Establece window.name con: <code>&lt;img src=x onerror=alert(1)&gt;</code> y luego recarga la página</p>
+                    </div>
+                </div>
+
+                <!-- Web Storage -->
+                <div class="challenge-section" id="storage-source">
+                    <h2 class="challenge-title">Web Storage (localStorage, sessionStorage)</h2>
+                    <div class="challenge-description">
+                        <p><code>localStorage</code> y <code>sessionStorage</code> permiten almacenar datos en el navegador. Si estos datos se reflejan sin sanitización, pueden conducir a vulnerabilidades XSS persistentes.</p>
+                        <p>Esta aplicación guarda y muestra el tema de preferencia del usuario. Intenta explotar el almacenamiento local.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa localStorage<br>
+                        function loadTheme() {<br>
+                        &nbsp;&nbsp;const theme = localStorage.getItem('userTheme') || 'predeterminado';<br>
+                        &nbsp;&nbsp;document.getElementById('storageResult').innerHTML = 'Tema actual: ' + theme;<br>
+                        }<br><br>
+                        
+                        function saveTheme() {<br>
+                        &nbsp;&nbsp;const theme = document.getElementById('storageInput').value;<br>
+                        &nbsp;&nbsp;localStorage.setItem('userTheme', theme);<br>
+                        &nbsp;&nbsp;document.getElementById('storageResult').innerHTML = 'Tema guardado: ' + theme;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Guarda un tema malicioso:</label>
+                        <input type="text" class="input-field" id="storageInput" placeholder="Ej: &lt;script&gt;alert(1)&lt;/script&gt;">
+                        <button class="btn btn-primary" id="storageBtn">Guardar Tema</button>
+                        <button class="btn btn-secondary" id="storageLoadBtn">Cargar Tema</button>
+                    </div>
+                    <div id="storageResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="storageHint">Mostrar pista</button>
+                    <div class="hint-container" id="storageHint">
+                        <p>Usa la consola para establecer: <code>localStorage.setItem('userTheme', '&lt;img src=x onerror=alert(1)&gt;')</code></p>
+                    </div>
+                </div>
+
+                <!-- History API -->
+                <div class="challenge-section" id="history-source">
+                    <h2 class="challenge-title">History API (pushState, replaceState)</h2>
+                    <div class="challenge-description">
+                        <p><code>history.pushState()</code> y <code>history.replaceState()</code> permiten manipular el historial del navegador. Si los datos del estado se utilizan sin sanitización, pueden conducir a XSS.</p>
+                        <p>Esta aplicación utiliza el estado del historial para mostrar información de navegación. Intenta explotar esta funcionalidad.</p>
+                    </div>
+                    <div class="code-container">
+                        // Código vulnerable que usa history.state<br>
+                        function displayState() {<br>
+                        &nbsp;&nbsp;if (history.state) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('historyResult').innerHTML = 'Estado: ' + JSON.stringify(history.state);<br>
+                        &nbsp;&nbsp;} else {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;document.getElementById('historyResult').innerHTML = 'No hay estado en el historial';<br>
+                        &nbsp;&nbsp;}<br>
+                        }<br><br>
+                        
+                        function setState() {<br>
+                        &nbsp;&nbsp;const stateData = document.getElementById('historyInput').value;<br>
+                        &nbsp;&nbsp;history.replaceState({data: stateData}, '', window.location);<br>
+                        &nbsp;&nbsp;document.getElementById('historyResult').innerHTML = 'Estado establecido: ' + stateData;<br>
+                        }
+                    </div>
+                    <div class="input-group">
+                        <label class="input-label">Establece un estado malicioso:</label>
+                        <input type="text" class="input-field" id="historyInput" placeholder="Ej: &lt;script&gt;alert(1)&lt;/script&gt;">
+                        <button class="btn btn-primary" id="historyBtn">Establecer Estado</button>
+                        <button class="btn btn-secondary" id="historyDisplayBtn">Mostrar Estado</button>
+                    </div>
+                    <div id="historyResult" class="result-container"></div>
+                    <button class="hint-btn" data-hint="historyHint">Mostrar pista</button>
+                    <div class="hint-container" id="historyHint">
+                        <p>Usa: <code>history.replaceState({data: "&lt;img src=x onerror=alert(1)&gt;"}, '', location.href)</code> en la consola</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+ 
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
